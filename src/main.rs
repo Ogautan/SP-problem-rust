@@ -122,6 +122,10 @@ mod solution {
 }
 
 fn main() {
+    use std::time::Instant;
+    let start = Instant::now();
     let ans = solution::solve();
     print!("{:?}", ans);
+    let duration = start.elapsed();
+    println!("\n耗时: {:?}", duration);
 }
