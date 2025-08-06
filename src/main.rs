@@ -2,7 +2,6 @@ mod solution {
     use std::collections::HashSet;
     const MIN: i32 = 2;
     const MAX: i32 = 99;
-    const MAX_PRODUCT: i32 = MAX * MAX;
 
     fn get_all_pairs() -> HashSet<(i32, i32)> {
         let mut pairs = HashSet::new();
@@ -80,6 +79,12 @@ mod solution {
 }
 
 fn main() {
+    use std::time::Instant;
+    let start = Instant::now();
+
     let ans = solution::solve();
     print!("{:?}", ans);
+
+    let duration = start.elapsed();
+    println!("\nTime elapsed: {:?}", duration);
 }
