@@ -1,8 +1,18 @@
 mod solution {
-    use std::collections::HashSet;
+    use std::collections::{HashMap, HashSet};
+    use std::sync::Mutex;
+
     const MIN: i32 = 2;
     const MAX: i32 = 99;
-    const MAX_PRODUCT: i32 = MAX * MAX;
+
+    use once_cell::sync::Lazy;
+
+    static SUM_PAIRS_CACHE: Lazy<Mutex<HashMap<i32, Vec<(i32, i32)>>>> =
+        Lazy::new(|| Mutex::new(HashMap::new()));
+    static PRODUCT_PAIRS_CACHE: Lazy<Mutex<HashMap<i32, Vec<(i32, i32)>>>> =
+        Lazy::new(|| Mutex::new(HashMap::new()));
+    static PRODUCT_NUMBER_CACHE: Lazy<Mutex<HashMap<i32, bool>>> =
+        Lazy::new(|| Mutex::new(HashMap::new()));
 
     fn get_all_pairs() -> HashSet<(i32, i32)> {
         let mut pairs = HashSet::new();
@@ -15,24 +25,42 @@ mod solution {
     }
 
     fn get_sum_pairs(n: i32) -> Vec<(i32, i32)> {
+        let mut cache = SUM_PAIRS_CACHE.lock().unwrap();
+        if let Some(v) = cache.get(&n) {
+            return v.clone();
+        }
         let half_n = n / 2;
-        (MIN..=half_n)
+        let v: Vec<(i32, i32)> = (MIN..=half_n)
             .filter(|i| (n - i) <= MAX)
             .map(|i| (i, n - i))
-            .collect()
+            .collect();
+        cache.insert(n, v.clone());
+        v
     }
 
     fn get_product_pairs(n: i32) -> Vec<(i32, i32)> {
+        let mut cache = PRODUCT_PAIRS_CACHE.lock().unwrap();
+        if let Some(v) = cache.get(&n) {
+            return v.clone();
+        }
         let sqrt_n = (n as f64).sqrt() as i32;
-        (MIN..=sqrt_n)
+        let v: Vec<(i32, i32)> = (MIN..=sqrt_n)
             .filter(|i| n % i == 0)
             .map(|i| (i, n / i))
-            .collect()
+            .collect();
+        cache.insert(n, v.clone());
+        v
     }
 
     fn can_be_product_number(n: i32) -> bool {
+        let mut cache = PRODUCT_NUMBER_CACHE.lock().unwrap();
+        if let Some(&b) = cache.get(&n) {
+            return b;
+        }
         let sqrt_n = (n as f64).sqrt() as i32;
-        (MIN..=sqrt_n).filter(|i| n % i == 0).take(2).count() == 2
+        let b = (MIN..=sqrt_n).filter(|i| n % i == 0).take(2).count() == 2;
+        cache.insert(n, b);
+        b
     }
 
     fn satisfy_s1((i, j): (i32, i32)) -> bool {
